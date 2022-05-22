@@ -1,5 +1,5 @@
 -- Gerado por Oracle SQL Developer Data Modeler 21.2.0.183.1957
---   em:        2022-05-17 21:40:22 BRT
+--   em:        2022-05-22 18:43:33 BRT
 --   site:      Oracle Database 11g
 --   tipo:      Oracle Database 11g
 
@@ -11,19 +11,20 @@
 
 CREATE TABLE t_animal (
     t_perfil_id_perfil             NUMBER(30) NOT NULL,
-    t_pessoa_id_perfil             NUMBER(30),
+    t_pessoa_t_perfil_id_perfil    NUMBER(30),
     t_estrutura_t_perfil_id_perfil NUMBER(30),
+    t_raca_id_raca                 NUMBER(30) NOT NULL,
     ds_sexo                        SMALLINT NOT NULL,
-    nr_tam                         NUMBER(1, 2) NOT NULL,
-    nr_peso                        NUMBER(3, 2) NOT NULL
+    nr_tam                         NUMBER(10, 5) NOT NULL,
+    nr_peso                        NUMBER(10, 5) NOT NULL
 );
 
 ALTER TABLE t_animal ADD CONSTRAINT t_animal_pk PRIMARY KEY ( t_perfil_id_perfil );
 
 CREATE TABLE t_cargo (
-    id_cargo           NUMBER(30) NOT NULL,
-    t_pessoa_id_perfil NUMBER(30) NOT NULL,
-    tp_cargo           SMALLINT NOT NULL
+    id_cargo                    NUMBER(30) NOT NULL,
+    t_pessoa_t_perfil_id_perfil NUMBER(30) NOT NULL,
+    tp_cargo                    SMALLINT NOT NULL
 );
 
 ALTER TABLE t_cargo ADD CONSTRAINT t_cargo_pk PRIMARY KEY ( id_cargo );
@@ -39,11 +40,6 @@ CREATE TABLE t_endereco (
     ds_comp            VARCHAR2(30)
 );
 
-CREATE UNIQUE INDEX t_endereco__idx ON
-    t_endereco (
-        t_perfil_id_perfil
-    ASC );
-
 ALTER TABLE t_endereco ADD CONSTRAINT t_endereco_pk PRIMARY KEY ( id_end );
 
 CREATE TABLE t_estrutura (
@@ -51,6 +47,11 @@ CREATE TABLE t_estrutura (
     cnpj               NUMBER(14) NOT NULL,
     ds_categoria       SMALLINT NOT NULL
 );
+
+CREATE UNIQUE INDEX t_estrutura__idx ON
+    t_estrutura (
+        cnpj
+    ASC );
 
 ALTER TABLE t_estrutura ADD CONSTRAINT t_estrutura_pk PRIMARY KEY ( t_perfil_id_perfil );
 
@@ -81,10 +82,10 @@ CREATE TABLE t_necessidade (
 ALTER TABLE t_necessidade ADD CONSTRAINT t_necessidade_pk PRIMARY KEY ( id_neces );
 
 CREATE TABLE t_peculiaridade (
-    id_peculiaridade   NUMBER(30) NOT NULL,
-    t_animal_id_perfil NUMBER(30) NOT NULL,
-    tp_pecul           SMALLINT NOT NULL,
-    ds_pecu            VARCHAR2(50) NOT NULL
+    id_peculiaridade            NUMBER(30) NOT NULL,
+    t_animal_t_perfil_id_perfil NUMBER(30) NOT NULL,
+    tp_pecul                    SMALLINT NOT NULL,
+    ds_pecu                     VARCHAR2(50) NOT NULL
 );
 
 ALTER TABLE t_peculiaridade ADD CONSTRAINT t_peculiaridade_pk PRIMARY KEY ( id_peculiaridade );
@@ -92,8 +93,10 @@ ALTER TABLE t_peculiaridade ADD CONSTRAINT t_peculiaridade_pk PRIMARY KEY ( id_p
 CREATE TABLE t_perfil (
     id_perfil         NUMBER(30) NOT NULL,
     t_usuario_id_user NUMBER(30) NOT NULL,
+    discriminacao     VARCHAR2(30) NOT NULL,
     nm_perfil         VARCHAR2(30) NOT NULL,
-    dt_origem         DATE NOT NULL
+    dt_origem         DATE NOT NULL,
+    discriminacao2    VARCHAR2(30) NOT NULL
 );
 
 ALTER TABLE t_perfil ADD CONSTRAINT t_perfil_pk PRIMARY KEY ( id_perfil );
@@ -104,27 +107,26 @@ CREATE TABLE t_pessoa (
     ds_sexo            SMALLINT NOT NULL
 );
 
+CREATE UNIQUE INDEX t_pessoa__idx ON
+    t_pessoa (
+        cpf
+    ASC );
+
 ALTER TABLE t_pessoa ADD CONSTRAINT t_pessoa_pk PRIMARY KEY ( t_perfil_id_perfil );
 
 CREATE TABLE t_pessoa_estru (
     t_estrutura_t_perfil_id_perfil NUMBER(30) NOT NULL,
-    t_pessoa_id_perfil             NUMBER(30) NOT NULL
+    t_pessoa_t_perfil_id_perfil    NUMBER(30) NOT NULL
 );
 
 ALTER TABLE t_pessoa_estru ADD CONSTRAINT t_pessoa_estru_pk PRIMARY KEY ( t_estrutura_t_perfil_id_perfil,
-                                                                          t_pessoa_id_perfil );
+                                                                          t_pessoa_t_perfil_id_perfil );
 
 CREATE TABLE t_raca (
-    id_raca            NUMBER(30) NOT NULL,
-    t_animal_id_perfil NUMBER(30) NOT NULL,
-    tp_animal          VARCHAR2(30) NOT NULL,
-    ds_raca            VARCHAR2(30) NOT NULL
+    id_raca   NUMBER(30) NOT NULL,
+    tp_animal VARCHAR2(30) NOT NULL,
+    ds_raca   VARCHAR2(30) NOT NULL
 );
-
-CREATE UNIQUE INDEX t_raca__idx ON
-    t_raca (
-        t_animal_id_perfil
-    ASC );
 
 ALTER TABLE t_raca ADD CONSTRAINT t_raca_pk PRIMARY KEY ( id_raca );
 
@@ -133,6 +135,11 @@ CREATE TABLE t_usuario (
     ds_email VARCHAR2(50) NOT NULL,
     ds_senha VARCHAR2(30) NOT NULL
 );
+
+CREATE UNIQUE INDEX t_usuario__idx ON
+    t_usuario (
+        ds_email
+    ASC );
 
 ALTER TABLE t_usuario ADD CONSTRAINT t_usuario_pk PRIMARY KEY ( id_user );
 
@@ -145,11 +152,15 @@ ALTER TABLE t_animal
         REFERENCES t_perfil ( id_perfil );
 
 ALTER TABLE t_animal
-    ADD CONSTRAINT t_animal_t_pessoa_fk FOREIGN KEY ( t_pessoa_id_perfil )
+    ADD CONSTRAINT t_animal_t_pessoa_fk FOREIGN KEY ( t_pessoa_t_perfil_id_perfil )
         REFERENCES t_pessoa ( t_perfil_id_perfil );
 
+ALTER TABLE t_animal
+    ADD CONSTRAINT t_animal_t_raca_fk FOREIGN KEY ( t_raca_id_raca )
+        REFERENCES t_raca ( id_raca );
+
 ALTER TABLE t_cargo
-    ADD CONSTRAINT t_cargo_t_pessoa_fk FOREIGN KEY ( t_pessoa_id_perfil )
+    ADD CONSTRAINT t_cargo_t_pessoa_fk FOREIGN KEY ( t_pessoa_t_perfil_id_perfil )
         REFERENCES t_pessoa ( t_perfil_id_perfil );
 
 ALTER TABLE t_endereco
@@ -169,7 +180,7 @@ ALTER TABLE t_necessidade
         REFERENCES t_perfil ( id_perfil );
 
 ALTER TABLE t_peculiaridade
-    ADD CONSTRAINT t_peculiaridade_t_animal_fk FOREIGN KEY ( t_animal_id_perfil )
+    ADD CONSTRAINT t_peculiaridade_t_animal_fk FOREIGN KEY ( t_animal_t_perfil_id_perfil )
         REFERENCES t_animal ( t_perfil_id_perfil );
 
 ALTER TABLE t_perfil
@@ -181,23 +192,100 @@ ALTER TABLE t_pessoa_estru
         REFERENCES t_estrutura ( t_perfil_id_perfil );
 
 ALTER TABLE t_pessoa_estru
-    ADD CONSTRAINT t_pessoa_estru_t_pessoa_fk FOREIGN KEY ( t_pessoa_id_perfil )
+    ADD CONSTRAINT t_pessoa_estru_t_pessoa_fk FOREIGN KEY ( t_pessoa_t_perfil_id_perfil )
         REFERENCES t_pessoa ( t_perfil_id_perfil );
 
 ALTER TABLE t_pessoa
     ADD CONSTRAINT t_pessoa_t_perfil_fk FOREIGN KEY ( t_perfil_id_perfil )
         REFERENCES t_perfil ( id_perfil );
 
-ALTER TABLE t_raca
-    ADD CONSTRAINT t_raca_t_animal_fk FOREIGN KEY ( t_animal_id_perfil )
-        REFERENCES t_animal ( t_perfil_id_perfil );
+CREATE OR REPLACE TRIGGER arc_arc_1_t_animal BEFORE
+    INSERT OR UPDATE OF t_perfil_id_perfil ON t_animal
+    FOR EACH ROW
+DECLARE
+    d VARCHAR2(30);
+BEGIN
+    SELECT
+        a.discriminacao
+    INTO d
+    FROM
+        t_perfil a
+    WHERE
+        a.id_perfil = :new.t_perfil_id_perfil;
+
+    IF ( d IS NULL OR d <> 'ANIMAL' ) THEN
+        raise_application_error(-20223,
+                               'FK T_ANIMAL_T_PERFIL_FK in Table T_ANIMAL violates Arc constraint on Table T_PERFIL - discriminator column discriminacao doesn''t have value ''ANIMAL''');
+    END IF;
+
+EXCEPTION
+    WHEN no_data_found THEN
+        NULL;
+    WHEN OTHERS THEN
+        RAISE;
+END;
+/
+
+CREATE OR REPLACE TRIGGER arc_arc_1_t_pessoa BEFORE
+    INSERT OR UPDATE OF t_perfil_id_perfil ON t_pessoa
+    FOR EACH ROW
+DECLARE
+    d VARCHAR2(30);
+BEGIN
+    SELECT
+        a.discriminacao
+    INTO d
+    FROM
+        t_perfil a
+    WHERE
+        a.id_perfil = :new.t_perfil_id_perfil;
+
+    IF ( d IS NULL OR d <> 'PESSOA' ) THEN
+        raise_application_error(-20223,
+                               'FK T_PESSOA_T_PERFIL_FK in Table T_PESSOA violates Arc constraint on Table T_PERFIL - discriminator column discriminacao doesn''t have value ''PESSOA''');
+    END IF;
+
+EXCEPTION
+    WHEN no_data_found THEN
+        NULL;
+    WHEN OTHERS THEN
+        RAISE;
+END;
+/
+
+CREATE OR REPLACE TRIGGER arc_arc_1_t_estrutura BEFORE
+    INSERT OR UPDATE OF t_perfil_id_perfil ON t_estrutura
+    FOR EACH ROW
+DECLARE
+    d VARCHAR2(30);
+BEGIN
+    SELECT
+        a.discriminacao
+    INTO d
+    FROM
+        t_perfil a
+    WHERE
+        a.id_perfil = :new.t_perfil_id_perfil;
+
+    IF ( d IS NULL OR d <> 'ESTRUTURA' ) THEN
+        raise_application_error(-20223,
+                               'FK T_ESTRUTURA_T_PERFIL_FK in Table T_ESTRUTURA violates Arc constraint on Table T_PERFIL - discriminator column discriminacao doesn''t have value ''ESTRUTURA''');
+    END IF;
+
+EXCEPTION
+    WHEN no_data_found THEN
+        NULL;
+    WHEN OTHERS THEN
+        RAISE;
+END;
+/
 
 
 
 -- Relatório do Resumo do Oracle SQL Developer Data Modeler: 
 -- 
 -- CREATE TABLE                            12
--- CREATE INDEX                             3
+-- CREATE INDEX                             4
 -- ALTER TABLE                             26
 -- CREATE VIEW                              0
 -- ALTER VIEW                               0
@@ -205,7 +293,7 @@ ALTER TABLE t_raca
 -- CREATE PACKAGE BODY                      0
 -- CREATE PROCEDURE                         0
 -- CREATE FUNCTION                          0
--- CREATE TRIGGER                           0
+-- CREATE TRIGGER                           3
 -- ALTER TRIGGER                            0
 -- CREATE COLLECTION TYPE                   0
 -- CREATE STRUCTURED TYPE                   0
