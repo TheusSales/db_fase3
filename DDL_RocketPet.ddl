@@ -1,5 +1,5 @@
 -- Gerado por Oracle SQL Developer Data Modeler 21.2.0.183.1957
---   em:        2022-05-22 18:43:33 BRT
+--   em:        2022-05-23 11:53:18 BRT
 --   site:      Oracle Database 11g
 --   tipo:      Oracle Database 11g
 
@@ -30,13 +30,13 @@ CREATE TABLE t_cargo (
 ALTER TABLE t_cargo ADD CONSTRAINT t_cargo_pk PRIMARY KEY ( id_cargo );
 
 CREATE TABLE t_endereco (
-    id_end             NUMBER NOT NULL,
+    id_end             NUMBER(30) NOT NULL,
     t_perfil_id_perfil NUMBER(30) NOT NULL,
     tp_end             SMALLINT NOT NULL,
     ds_estado          VARCHAR2(30) NOT NULL,
     ds_cidade          VARCHAR2(30) NOT NULL,
     ds_bairro          VARCHAR2(30) NOT NULL,
-    cep                NUMBER(8) NOT NULL,
+    cep                VARCHAR2(30) NOT NULL,
     ds_comp            VARCHAR2(30)
 );
 
@@ -44,7 +44,7 @@ ALTER TABLE t_endereco ADD CONSTRAINT t_endereco_pk PRIMARY KEY ( id_end );
 
 CREATE TABLE t_estrutura (
     t_perfil_id_perfil NUMBER(30) NOT NULL,
-    cnpj               NUMBER(14) NOT NULL,
+    cnpj               VARCHAR2(30) NOT NULL,
     ds_categoria       SMALLINT NOT NULL
 );
 
@@ -95,15 +95,14 @@ CREATE TABLE t_perfil (
     t_usuario_id_user NUMBER(30) NOT NULL,
     discriminacao     VARCHAR2(30) NOT NULL,
     nm_perfil         VARCHAR2(30) NOT NULL,
-    dt_origem         DATE NOT NULL,
-    discriminacao2    VARCHAR2(30) NOT NULL
+    dt_origem         DATE NOT NULL
 );
 
 ALTER TABLE t_perfil ADD CONSTRAINT t_perfil_pk PRIMARY KEY ( id_perfil );
 
 CREATE TABLE t_pessoa (
     t_perfil_id_perfil NUMBER(30) NOT NULL,
-    cpf                NUMBER(11) NOT NULL,
+    cpf                VARCHAR2(30) NOT NULL,
     ds_sexo            SMALLINT NOT NULL
 );
 
@@ -282,7 +281,7 @@ END;
 
 
 
--- Relatório do Resumo do Oracle SQL Developer Data Modeler: 
+-- Relatï¿½rio do Resumo do Oracle SQL Developer Data Modeler: 
 -- 
 -- CREATE TABLE                            12
 -- CREATE INDEX                             4
